@@ -25,9 +25,9 @@ class SafeRedirect(urllib.request.HTTPRedirectHandler):
         return result
 
 @st.cache_resource(show_spinner="Kripto Radar hazırlanıyor…")
-def load_private_app(_token):
+def load_private_app(_token, commit):
     request = urllib.request.Request(
-        f"https://api.github.com/repos/{REPOSITORY}/tarball/{COMMIT}",
+        f"https://api.github.com/repos/{REPOSITORY}/tarball/{commit}",
         headers={"Authorization": "Bearer " + _token,
                  "Accept": "application/vnd.github+json",
                  "User-Agent": "KriptoRadar-PublicLauncher"})
@@ -72,7 +72,7 @@ if not token:
     st.info("Yayın hazır. Yönetici tarafından kalıcı kayıt bağlantısı tamamlanıyor.")
     st.stop()
 try:
-    source_root = load_private_app(token)
+    source_root = load_private_app(token, COMMIT)
 except Exception:
     st.set_page_config(page_title="Kripto Radar · Kurulum", page_icon="◉", layout="wide")
     st.title("Kripto Radar")
