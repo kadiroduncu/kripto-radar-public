@@ -1,3 +1,4 @@
+# Checkpoint maintenance 2026-10-21: streaming restore and stdlib LZMA archives.
 streamlit==1.57.0
 pandas==3.0.2
 altair==6.1.0
