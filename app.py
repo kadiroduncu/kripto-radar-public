@@ -12,7 +12,7 @@ import certifi
 import streamlit as st
 
 REPOSITORY = "kadiroduncu/kripto-short-radar"
-COMMIT = "d5fefcbb61684e58e0d4c89b1f13ac1b3e3d58cd"
+COMMIT = "df6447859f23d83a57a9e558ebc2a68f464843a8"
 MAX_ARCHIVE = 32 * 1024 * 1024
 
 class SafeRedirect(urllib.request.HTTPRedirectHandler):
