@@ -12,7 +12,7 @@ import certifi
 import streamlit as st
 
 REPOSITORY = "kadiroduncu/kripto-short-radar"
-COMMIT = "2ebaa140de04d0affc4cf438e236d2af387162fb"
+COMMIT = "f7738f925dc5ef62c7976665d82925a8025a302e"
 MAX_ARCHIVE = 32 * 1024 * 1024
 
 class SafeRedirect(urllib.request.HTTPRedirectHandler):
@@ -69,14 +69,35 @@ token = settings.get("github_token", "")
 if not token:
     st.set_page_config(page_title="Kripto Radar · Kurulum", page_icon="◉", layout="wide")
     st.title("Kripto Radar")
-    st.info("Yayın hazır. Yönetici tarafından kalıcı kayıt bağlantısı tamamlanıyor.")
+    st.error("Başlangıç tanısı: RADAR_SECRET_MISSING")
+    st.info("Bu Streamlit uygulamasının Settings → Secrets bölümünde [radar] github_token bulunmuyor. Özel kaynak kod ve kayıt yedeği bu erişim olmadan açılmaz.")
+    st.caption("Token değerini bu sayfaya, GitHub koduna veya sohbete yazmayın. Yetkili hesapla Streamlit Secrets alanında tanımlayın.")
     st.stop()
 try:
     source_root = load_private_app(token, COMMIT)
-except Exception:
+except Exception as error:
     st.set_page_config(page_title="Kripto Radar · Kurulum", page_icon="◉", layout="wide")
     st.title("Kripto Radar")
-    st.error("Uygulama kaynağına erişilemiyor. Yönetici bağlantı ayarlarını kontrol etmeli.")
+    # Show only a bounded diagnostic category, never a token, URL query or raw exception.
+    status = getattr(error, "code", None)
+    if status == 401:
+        reason = "GitHub erişim anahtarı reddedildi (HTTP 401)."
+        label = "SOURCE_HTTP_401"
+    elif status == 403:
+        reason = "GitHub erişimi engellendi: izin veya API limiti (HTTP 403)."
+        label = "SOURCE_HTTP_403"
+    elif status == 404:
+        reason = "Özel depo veya sürüm bu anahtarla görülemiyor (HTTP 404)."
+        label = "SOURCE_HTTP_404"
+    elif isinstance(error, (tarfile.TarError, ValueError)):
+        reason = "İndirilen uygulama arşivi güvenli biçimde açılamadı."
+        label = "SOURCE_ARCHIVE"
+    else:
+        reason = "Özel uygulama dosyaları alınamadı."
+        label = "SOURCE_CONNECTION"
+    st.error("Başlangıç tanısı: " + label)
+    st.info(reason + " Streamlit Manage app → Settings → Secrets bağlantısını ve GitHub token erişimini kontrol edin.")
+    st.caption("Özel depo: " + REPOSITORY + " · Sürüm: " + COMMIT[:12] + " · GitHub tokenını bu sayfada paylaşmayın.")
     st.stop()
 sys.path.insert(0, str(source_root))
 runpy.run_path(str(source_root / "app.py"), run_name="__main__")
